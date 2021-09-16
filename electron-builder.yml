@@ -1,0 +1,51 @@
+appId: 'ezarielLauncher'
+productName: 'Ezariel Launcher'
+artifactName: '${productName}-setup-${version}.${ext}'
+
+copyright: 'Copyright ©2021 HazielDev & Ezariel'
+
+asar: true
+compression: 'maximum'
+
+files:
+  - '!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.json,build.js}'
+
+extraResources:
+  - 'libraries'
+
+# Windows Configuration
+win: 
+  target: 
+    - target: 'nsis'
+      arch: 'x64'
+
+# Windows Installer Configuration
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+
+# macOS Configuration
+mac:
+  target:
+    - target: 'dmg'
+      arch:
+        - 'x64'
+        - 'arm64'
+  artifactName: '${productName}-setup-${version}-${arch}.${ext}'
+  category: 'public.app-category.games'
+
+# Linux Configuration
+linux: 
+  target: 'AppImage'
+  maintainer: 'HazielDev & Ezariel'
+  vendor: 'HazielDev & Ezariel'
+  synopsis: 'Ezariel Minecraft Launcher'
+  description: 'Ezariel Minecraft Launcher for the network ezariel.eu.'
+  category: 'Game'
+
+
+directories:
+  buildResources: 'build'
+  output: 'dist'
