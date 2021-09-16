@@ -10,8 +10,8 @@
 **Clone and Install Dependencies**
 
 ```console
-> git clone https://github.com/dscalzi/HeliosLauncher.git
-> cd HeliosLauncher
+> git clone https://github.com/RomualdLewandoski/EzarielLauncher.git
+> cd EzarielLauncher
 > npm install
 ```
 
