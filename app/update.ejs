@@ -1,0 +1,161 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" http-equiv="Content-Security-Policy"
+          content="script-src 'self' 'sha256-In6B8teKZQll5heMl9bS7CESTbGvuAt3VVV86BUQBDk='"/>
+    <title></title>
+    <link type="text/css" rel="stylesheet" href="./assets/css/launcher.css">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+          integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <style>
+        body {
+            background: transparent;
+        }
+
+        #main {
+            display: none;
+            height: calc(100% - 22px);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
+            width: 100%;
+            position: absolute;
+            z-index: 10;
+        }
+
+        #main[overlay] {
+            filter: blur(3px) contrast(0.9) brightness(1.0);
+        }
+
+        #myVideo {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+        }
+
+        .update{
+            padding-top: 15px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @-webkit-keyframes loader {
+            0% {
+                width: 0;
+            }
+            20% {
+                width: 10%;
+            }
+            25% {
+                width: 24%;
+            }
+            43% {
+                width: 41%;
+            }
+            56% {
+                width: 50%;
+            }
+            66% {
+                width: 52%;
+            }
+            71% {
+                width: 60%;
+            }
+            75% {
+                width: 76%;
+            }
+            94% {
+                width: 86%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+
+        @keyframes loader {
+            0% {
+                width: 0;
+            }
+            20% {
+                width: 10%;
+            }
+            25% {
+                width: 24%;
+            }
+            43% {
+                width: 41%;
+            }
+            56% {
+                width: 50%;
+            }
+            66% {
+                width: 52%;
+            }
+            71% {
+                width: 60%;
+            }
+            75% {
+                width: 76%;
+            }
+            94% {
+                width: 86%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+        .progress-bar {
+            border-radius: 60px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .progress-bar span {
+            display: block;
+        }
+
+        .bar {
+            background: rgba(0, 0, 0, 0.075);
+        }
+
+        .progress {
+            -webkit-animation: loader 4s ease infinite;
+            animation: loader 4s ease infinite;
+            background: #75b800;
+            color: #fff;
+            padding: 5px;
+            width: 0;
+        }
+
+        .progress-bar {
+            left: 50%;
+            max-width: 75%;
+            position: absolute;
+            top: 50%;
+            transform: translate3d(-50%, -50%, 0);
+        }
+    </style>
+</head>
+<body>
+<center>
+    <h2 class="update">
+        Mise à jour en cours... veuillez patienter
+    </h2>
+</center>
+
+<div class="progress-bar">
+  <span class="bar">
+    <span class="progress"></span>
+  </span>
+</div>
+
+<div id="main">
+
+</div>
+<script>
+    // Load language
+    for (let key of Object.keys(Lang.query('html'))) {
+        document.getElementById(key).innerHTML = Lang.query(`html.${key}`)
+    }
+</script>
+
+</body>
+</html>

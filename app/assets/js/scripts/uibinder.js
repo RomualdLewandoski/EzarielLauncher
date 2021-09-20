@@ -106,8 +106,8 @@ function showFatalStartupError() {
         $('#loadingContainer').fadeOut(250, () => {
             document.getElementById('overlayContainer').style.background = 'none'
             setOverlayContent(
-                'Fatal Error: Unable to Load Distribution Index',
-                'A connection could not be established to our servers to download the distribution index. No local copies were available to load. <br><br>The distribution index is an essential file which provides the latest server information. The launcher is unable to start without it. Ensure you are connected to the internet and relaunch the application.',
+                ' Erreur: Impossible de réupérer le fichier de configuration',
+                'Une connexion n\'as pu être établie avec nos serveurs pour télécharger le fichier de configuration <br><br>Ce fichier est essentiel pour fournir au launcher toutes les informations. Le launcher ne peut démarer sans celui ci. Assurez vous d\'être connecté a internet et relancez l\'application.',
                 'Close'
             )
             setOverlayHandler(() => {
@@ -320,8 +320,8 @@ async function validateSelectedAccount() {
             ConfigManager.save()
             const accLen = Object.keys(ConfigManager.getAuthAccounts()).length
             setOverlayContent(
-                'Failed to Refresh Login',
-                `We were unable to refresh the login for <strong>${selectedAcc.displayName}</strong>. Please ${accLen > 0 ? 'select another account or ' : ''} login again.`,
+                'Impossible de valider le login',
+                `Merci de vous reconnecter.`,
                 'Login',
                 'Select Another Account'
             )
@@ -379,14 +379,16 @@ function setSelectedAccount(uuid) {
 }
 
 // Synchronous Listener
-document.addEventListener('readystatechange', function () {
+document.addEventListener('readystatechange', async function () {
 
     if (document.readyState === 'interactive' || document.readyState === 'complete') {
         if (rscShouldLoad) {
             rscShouldLoad = false
             if (!fatalStartupError) {
-                const data = DistroManager.getDistribution()
-                showMainUI(data)
+                const data =  DistroManager.getDistro().then((data) => {
+                    showMainUI(data)
+                })
+
             } else {
                 showFatalStartupError()
             }
@@ -396,9 +398,9 @@ document.addEventListener('readystatechange', function () {
 }, false)
 
 // Actions that must be performed after the distribution index is downloaded.
-ipcRenderer.on('distributionIndexDone', (event, res) => {
+ipcRenderer.on('distributionIndexDone', async (event, res) => {
     if (res) {
-        const data = DistroManager.getDistribution()
+        const data = await DistroManager.getDistro()
         syncModConfigurations(data)
         if (document.readyState === 'interactive' || document.readyState === 'complete') {
             showMainUI(data)

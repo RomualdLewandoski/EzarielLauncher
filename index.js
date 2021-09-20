@@ -1,30 +1,33 @@
 require('@electron/remote/main').initialize()
 
 // Requirements
-const { app, BrowserWindow, ipcMain, Menu } = require('electron')
-const autoUpdater                   = require('electron-updater').autoUpdater
-const ejse                          = require('ejs-electron')
-const fs                            = require('fs')
-const isDev                         = require('./app/assets/js/isdev')
-const path                          = require('path')
-const semver                        = require('semver')
-const { pathToFileURL }             = require('url')
+const {app, BrowserWindow, ipcMain, Menu, dialog} = require('electron')
+const autoUpdater = require('electron-updater').autoUpdater
+const ejse = require('ejs-electron')
+const fs = require('fs')
+const isDev = require('./app/assets/js/isdev')
+const path = require('path')
+const semver = require('semver')
+const {pathToFileURL} = require('url')
+const launcherDir = process.env.CONFIG_DIRECT_PATH || app.getPath('userData')
+const EAU = require('electron-asar-hot-updater')
+
 
 // Setup auto updater.
 function initAutoUpdater(event, data) {
 
-    if(data){
+    if (data) {
         autoUpdater.allowPrerelease = true
     } else {
         // Defaults to true if application version contains prerelease components (e.g. 0.12.1-alpha.1)
         // autoUpdater.allowPrerelease = true
     }
-    
-    if(isDev){
+
+    if (isDev) {
         autoUpdater.autoInstallOnAppQuit = false
         autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml')
     }
-    if(process.platform === 'darwin'){
+    if (process.platform === 'darwin') {
         autoUpdater.autoDownload = false
     }
     autoUpdater.on('update-available', (info) => {
@@ -41,12 +44,12 @@ function initAutoUpdater(event, data) {
     })
     autoUpdater.on('error', (err) => {
         event.sender.send('autoUpdateNotification', 'realerror', err)
-    }) 
+    })
 }
 
 // Open channel to listen for update actions.
 ipcMain.on('autoUpdateAction', (event, arg, data) => {
-    switch(arg){
+    switch (arg) {
         case 'initAutoUpdater':
             console.log('Initializing auto updater.')
             initAutoUpdater(event, data)
@@ -59,9 +62,9 @@ ipcMain.on('autoUpdateAction', (event, arg, data) => {
                 })
             break
         case 'allowPrereleaseChange':
-            if(!data){
+            if (!data) {
                 const preRelComp = semver.prerelease(app.getVersion())
-                if(preRelComp != null && preRelComp.length > 0){
+                if (preRelComp != null && preRelComp.length > 0) {
                     autoUpdater.allowPrerelease = true
                 } else {
                     autoUpdater.allowPrerelease = data
@@ -94,35 +97,53 @@ app.allowRendererProcessReuse = true
 // be closed automatically when the JavaScript object is garbage collected.
 let win
 
-function createWindow() {
+function createWindow(isUpdate) {
 
-    win = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        minWidth: 980,
-        minHeight: 552,
-        icon: getPlatformIcon('logo'),
-        frame: false,
-        webPreferences: {
-            preload: path.join(__dirname, 'app', 'assets', 'js', 'preloader.js'),
-            nodeIntegration: true,
-            contextIsolation: false,
-            enableRemoteModule: true
-        },
-        backgroundColor: '#171614'
-    })
+    if (!isUpdate) {
+        win = new BrowserWindow({
+            width: 1280,
+            height: 720,
+            minWidth: 980,
+            minHeight: 552,
+            icon: getPlatformIcon('logo'),
+            frame: false,
+            resizable: true,
+            webPreferences: {
+                preload: path.join(__dirname, 'app', 'assets', 'js', 'preloader.js'),
+                nodeIntegration: true,
+                contextIsolation: false,
+                enableRemoteModule: true
+            },
+            backgroundColor: '#171614'
+        })
 
-    ejse.data('bkid', Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)))
+        ejse.data('bkid', Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)))
+        win.webContents.session.clearCache(function(){
 
-    win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'app.ejs')).toString())
-
+        })
+        win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'app.ejs')).toString())
+    } else {
+        win = new BrowserWindow({
+            width: 500,
+            height: 200,
+            icon: getPlatformIcon('logo'),
+            frame: false,
+            resizable: false,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false,
+                enableRemoteModule: true
+            },
+            backgroundColor: '#171614'
+        })
+        ejse.data('bkid', Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)))
+        win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'update.ejs')).toString())
+    }
     /*win.once('ready-to-show', () => {
         win.show()
     })*/
 
     win.removeMenu()
-
-    win.resizable = true
 
     win.on('closed', () => {
         win = null
@@ -130,8 +151,8 @@ function createWindow() {
 }
 
 function createMenu() {
-    
-    if(process.platform === 'darwin') {
+
+    if (process.platform === 'darwin') {
 
         // Extend default included application menu to continue support for quit keyboard shortcut
         let applicationSubMenu = {
@@ -193,9 +214,9 @@ function createMenu() {
 
 }
 
-function getPlatformIcon(filename){
+function getPlatformIcon(filename) {
     let ext
-    switch(process.platform) {
+    switch (process.platform) {
         case 'win32':
             ext = 'ico'
             break
@@ -209,8 +230,79 @@ function getPlatformIcon(filename){
     return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
 }
 
-app.on('ready', createWindow)
-app.on('ready', createMenu)
+//here we need to save a default distro file:
+const distro = {
+    version: '0.0.1',
+    discord: {
+        clientId: '884772723274948628',
+        smallImageText: 'Ezariel Network',
+        smallImageKey: 'logo_1024'
+    },
+    java: {
+        oracle: 'http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html'
+    },
+    servers: []
+}
+let distribution = path.join(launcherDir, 'distribution.json')
+
+try {
+    if (!fs.existsSync(distribution)) {
+        fs.writeFileSync(distribution, JSON.stringify(distro, null, 4), 'UTF-8')
+    }
+} catch (err) {
+    console.log(err)
+}
+
+
+app.on('ready', function () {
+    EAU.init({
+        'api': 'https://launcher.ezariel.eu/launcherData/api.json',
+        'server': true,
+        'debug': false,
+        'headers': {},
+        'body': {
+            name: app.name,
+            current: app.getVersion()
+        },
+        'formatRes': function (res) {
+            return res
+        }
+    })
+    EAU.check(function (error, last, body) {
+        if (error) {
+            createMenu()
+            createWindow(false)
+        } else {
+            if (semver.lt(app.getVersion(), last)) {
+                dialog.showErrorBox('Mise a jour', 'Une nouvelle version est disponnible, le launcher va se mettre à jour')
+                createMenu()
+                createWindow(true)
+                //here we need to create our download
+                EAU.progress(function (state) {
+
+                })
+                EAU.download(function (error) {
+                    if (error) {
+                        dialog.showErrorBox('info', error)
+                        app.quit()
+                    }
+                    dialog.showErrorBox('Mise à jour', 'La mise à jour a été téléchargée, le launcher va redémarer.')
+                    if (process.platform === 'darwin') {
+                        app.relaunch()
+                        app.quit()
+                    } else {
+                        app.quit()
+                    }
+                })
+            } else {
+                createMenu()
+                createWindow(false)
+            }
+        }
+    })
+})
+//app.on('ready', createWindow)
+//app.on('ready', createMenu)
 
 app.on('window-all-closed', () => {
     // On macOS it is common for applications and their menu bar
@@ -220,10 +312,11 @@ app.on('window-all-closed', () => {
     }
 })
 
+
 app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (win === null) {
-        createWindow()
+        createWindow(false)
     }
 })

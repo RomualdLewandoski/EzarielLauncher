@@ -1,5 +1,5 @@
 /* Github Code Highlighting. */
-@import "../../../node_modules/github-syntax-dark/lib/github-dark.css";
+
 
 /*******************************************************************************
  *                                                                             *
@@ -2419,10 +2419,11 @@ input:checked + .toggleSwitchSlider:before {
 }
 
 #landingContainer > #upper > #left {
-    display: inline-flex;
+
     width: 15%;
     height: 100%;
-    justify-content: flex-end;
+    margin-left: 15px;
+    padding-top: 15px;
 }
 
 #landingContainer > #upper > #content {
@@ -4046,4 +4047,17 @@ a #settingsTooltip {
     font-size: 1em;
     width: 20px;
     height: 17px;
+}
+
+#audioControll {
+    cursor: pointer;
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 999999;
+
+}
+
+#audioControll:hover {
+    cursor: pointer;
 }

@@ -45,7 +45,12 @@
     <source src="" type="video/mp4" id="myVideoSrc">
 </video>
 
+<audio id="myAudio" src="" controls loop="true" hidden></audio>
+
 <div id="main">
+    <div id="audioControll">
+        <i class="fas fa-volume-up fa-2x" id="audioIcon"></i>
+    </div>
     <%- include('welcome') %>
     <%- include('login') %>
     <%- include('settings') %>

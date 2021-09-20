@@ -131,13 +131,19 @@ function updateSelectedAccount(authUser, config) {
             username = authUser.displayName
         }
         if (authUser.uuid != null) {
-            document.getElementById('avatarContainer').style.backgroundImage = `url('http://ezariel.eu/3d.php?user=${authUser.displayName}')`
+            document.getElementById('avatarContainer').style.backgroundImage = `url('https://ezariel.eu/3d.php?user=${authUser.displayName}')`
         }
     }
     user_text.innerHTML = username
 }
 
-updateSelectedAccount(ConfigManager.getSelectedAccount(), launcherConfigs)
+function loopUpdate() {
+    console.log('call update skin')
+    updateSelectedAccount(ConfigManager.getSelectedAccount(), launcherConfigs)
+    setInterval(loopUpdate, 1 * 60 * 1000)
+}
+
+loopUpdate()
 
 // Bind selected server
 function updateSelectedServer(serv) {
@@ -583,7 +589,7 @@ function dlAsync(login = true) {
                 loggerLaunchSuite.error('Error during validation:', m.result)
 
                 loggerLaunchSuite.error('Error during launch', m.result.error)
-                showLaunchFailure('Error During Launch', 'Please check the console (CTRL + Shift + i) for more details.')
+                showLaunchFailure('Erreur lors du lancement', 'Consultez la console pour plus de détails')
 
                 allGood = false
             }
@@ -601,6 +607,7 @@ function dlAsync(login = true) {
                 const SERVER_JOINED_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} joined the game`)
 
                 const onLoadComplete = () => {
+                    document.getElementById('myAudio').pause()
                     toggleLaunchArea(false)
                     if (hasRPC) {
                         DiscordWrapper.updateDetails('Loading game..')

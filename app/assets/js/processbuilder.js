@@ -27,7 +27,7 @@ class ProcessBuilder {
         this.fmlDir = path.join(this.gameDir, 'forgeModList.json')
         this.llDir = path.join(this.gameDir, 'liteloaderModList.json')
         this.libPath = path.join(this.commonDir, 'libraries')
-
+        this.authUser.access_token = ConfigManager.getClientToken()
         this.usingLiteLoader = false
         this.llPath = null
     }

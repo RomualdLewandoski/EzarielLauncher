@@ -11,7 +11,6 @@
 // Requirements
 const ConfigManager = require('./configmanager')
 const LoggerUtil = require('./loggerutil')
-const Mojang = require('./mojang')
 const fetch = require('node-fetch')
 const {URLSearchParams} = require('url')
 
@@ -95,7 +94,7 @@ exports.removeAccount = async function (uuid) {
  */
 exports.validateSelected = async function () {
     const current = ConfigManager.getSelectedAccount()
-    const isValid = await Mojang.validate(current.accessToken, ConfigManager.getClientToken())
+    /*const isValid = await Mojang.validate(current.accessToken, ConfigManager.getClientToken())
     if (!isValid) {
         try {
             const session = await Mojang.refresh(current.accessToken, ConfigManager.getClientToken())
@@ -114,5 +113,21 @@ exports.validateSelected = async function () {
     } else {
         loggerSuccess.log('Account access token validated.')
         return true
+    }*/
+    let session
+    const params = new URLSearchParams()
+    params.append('access_token', current.accessToken)
+    await fetch('https://ezariel.eu/api/auth/verify', {method: 'POST', body: params})
+        .then(res => res.json())
+        .then(json => session = json)
+    if (session.status != undefined && !session.status) {
+        logger.log('Account access token is invalid.')
+        return false
+    } else {
+        ConfigManager.updateAuthAccount(current.uuid, session.accessToken)
+        ConfigManager.save()
+        loggerSuccess.log('Account access token validated.')
+        return true
     }
+
 }

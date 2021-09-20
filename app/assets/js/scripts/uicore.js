@@ -181,6 +181,24 @@ document.addEventListener('readystatechange', async function () {
         $('#myVideoSrc').attr('src', launcherConfigs.fallbackVideo)
         $('#myVideo').get(0).load()
         document.getElementById('myVideo').play()
+
+        $('#myAudio').attr('src', launcherConfigs.fallbackAudio)
+        $('#myAudio').prop('volume', 0.1)
+
+
+        if (localStorage.getItem('audio') == null) {
+            localStorage.setItem('audio', 'on')
+        }
+
+        if (localStorage.getItem('audio') == 'on') {
+            document.getElementById('myAudio').play()
+        } else {
+            $('#audioIcon').removeClass('fa-volume-up')
+            $('#audioIcon').addClass('fa-volume-mute')
+        }
+
+        $('#audioControll').click(toogleAudio)
+
         initNews()
         refreshServerStatus()
         /**
@@ -204,6 +222,20 @@ document.addEventListener('readystatechange', async function () {
     }
 
 }, false)
+
+function toogleAudio(){
+    if(localStorage.getItem('audio') == 'on'){
+        $('#audioIcon').removeClass('fa-volume-up')
+        $('#audioIcon').addClass('fa-volume-mute')
+        document.getElementById('myAudio').pause()
+        localStorage.setItem('audio', 'off')
+    }else{
+        $('#audioIcon').removeClass('fa-volume-mute')
+        $('#audioIcon').addClass('fa-volume-up')
+        document.getElementById('myAudio').play()
+        localStorage.setItem('audio', 'on')
+    }
+}
 
 function refreshLoop(meter) {
     window.requestAnimationFrame(() => {
