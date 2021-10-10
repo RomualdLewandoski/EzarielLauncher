@@ -1,16 +1,41 @@
 require('@electron/remote/main').initialize()
 
 // Requirements
-const {app, BrowserWindow, ipcMain, Menu, dialog} = require('electron')
+const {app, BrowserWindow, ipcMain, Menu, dialog, shell} = require('electron')
 const autoUpdater = require('electron-updater').autoUpdater
 const ejse = require('ejs-electron')
 const fs = require('fs')
-const isDev = require('./app/assets/js/isdev')
+const isDev = require('./app/template/default/assets/js/isdev')
 const path = require('path')
 const semver = require('semver')
 const {pathToFileURL} = require('url')
 const launcherDir = process.env.CONFIG_DIRECT_PATH || app.getPath('userData')
 const EAU = require('electron-asar-hot-updater')
+let toQuit = true
+
+//AVAILABLES THEMES ARE : default, modern
+let themeFile = path.join(launcherDir, 'theme.txt')
+let theme
+try {
+    if (fs.existsSync(themeFile)) {
+        try {
+            let data = fs.readFileSync(themeFile, 'utf8')
+            theme = data
+        } catch (err) {
+            theme = 'default'
+        }
+    } else {
+        //on le crée ici
+        try {
+            fs.writeFileSync(themeFile, 'default')
+            theme = 'default'
+        } catch (err) {
+            theme = 'default'
+        }
+    }
+} catch (e) {
+    theme = 'default'
+}
 
 
 // Setup auto updater.
@@ -109,7 +134,7 @@ function createWindow(isUpdate) {
             frame: false,
             resizable: true,
             webPreferences: {
-                preload: path.join(__dirname, 'app', 'assets', 'js', 'preloader.js'),
+                preload: path.join(__dirname, 'app', 'template', theme, 'assets', 'js', 'preloader.js'),
                 nodeIntegration: true,
                 contextIsolation: false,
                 enableRemoteModule: true
@@ -117,11 +142,11 @@ function createWindow(isUpdate) {
             backgroundColor: '#171614'
         })
 
-        ejse.data('bkid', Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)))
-        win.webContents.session.clearCache(function(){
-
+        ejse.data('bkid', Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'template', theme, 'assets', 'images', 'backgrounds')).length)))
+        win.webContents.session.clearCache(function () {
         })
-        win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'app.ejs')).toString())
+        win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'template', theme, 'app.ejs')).toString())
+        //win.webContents.openDevTools()
     } else {
         win = new BrowserWindow({
             width: 500,
@@ -136,7 +161,7 @@ function createWindow(isUpdate) {
             },
             backgroundColor: '#171614'
         })
-        ejse.data('bkid', Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)))
+        ejse.data('bkid', Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'template', theme, 'assets', 'images', 'backgrounds')).length)))
         win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'update.ejs')).toString())
     }
     /*win.once('ready-to-show', () => {
@@ -227,7 +252,7 @@ function getPlatformIcon(filename) {
             break
     }
 
-    return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
+    return path.join(__dirname, 'app', 'template', theme, 'assets', 'images', `${filename}.${ext}`)
 }
 
 //here we need to save a default distro file:
@@ -275,25 +300,41 @@ app.on('ready', function () {
         } else {
             if (semver.lt(app.getVersion(), last)) {
                 dialog.showErrorBox('Mise a jour', 'Une nouvelle version est disponnible, le launcher va se mettre à jour')
-                createMenu()
-                createWindow(true)
-                //here we need to create our download
-                EAU.progress(function (state) {
 
-                })
-                EAU.download(function (error) {
-                    if (error) {
-                        dialog.showErrorBox('info', error)
-                        app.quit()
-                    }
-                    dialog.showErrorBox('Mise à jour', 'La mise à jour a été téléchargée, le launcher va redémarer.')
-                    if (process.platform === 'darwin') {
-                        app.relaunch()
-                        app.quit()
-                    } else {
-                        app.quit()
-                    }
-                })
+                //@TODO différent pour mac et linux ici !
+                if (process.platform === 'darwin') {
+                    //code mac
+                    //on va ouvrir une fenetre de confirmation
+                    dialog.showErrorBox('Mise à jour', 'Une mise a jour est disponnible, merci de la telecharger ')
+                    shell.openExternal('https://launcher.ezariel.eu/download/mac')
+
+                } else if (process.platform === 'linux') {
+                    dialog.showErrorBox('Mise à jour', 'Une mise a jour est disponnible, merci de la telecharger ')
+                    shell.openExternal('https://launcher.ezariel.eu/download/linux')
+                    //code linux
+                    //on va ouvrir une fenetre de confirmation
+
+                } else {
+                    createMenu()
+                    createWindow(true)
+                    //here we need to create our download
+                    EAU.progress(function (state) {
+
+                    })
+                    EAU.download(function (error) {
+                        if (error) {
+                            dialog.showErrorBox('info', error)
+                            app.quit()
+                        }
+                        dialog.showErrorBox('Mise à jour', 'La mise à jour a été téléchargée, le launcher va redémarer.')
+                        if (process.platform === 'darwin') {
+                            app.relaunch()
+                            app.quit()
+                        } else {
+                            app.quit()
+                        }
+                    })
+                }
             } else {
                 createMenu()
                 createWindow(false)
@@ -308,7 +349,11 @@ app.on('window-all-closed', () => {
     // On macOS it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
-        app.quit()
+        if (toQuit) {
+            app.quit()
+        } else {
+            toQuit = true
+        }
     }
 })
 
@@ -319,4 +364,40 @@ app.on('activate', () => {
     if (win === null) {
         createWindow(false)
     }
+})
+
+ipcMain.on('openConsole', () => {
+    win.webContents.openDevTools()
+})
+
+ipcMain.on('delete-action', (event) => {
+    const sysRoot = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
+    const dataPath = path.join(sysRoot, '.ezariel')
+
+    fs.rmdir(dataPath, {recursive: true}, (err) => {
+        if (err) {
+            throw err
+        }
+    })
+
+    event.reply('delete-ok')
+
+})
+
+ipcMain.on('switch-theme', (event, args) => {
+    console.log('recieve', args)
+    if (theme != args) {
+        try {
+            fs.writeFileSync(themeFile, args)
+            theme = args
+        } catch (err) {
+            theme = args
+        }
+
+        toQuit = false
+        win.close()
+        createWindow(false)
+
+    }
+
 })

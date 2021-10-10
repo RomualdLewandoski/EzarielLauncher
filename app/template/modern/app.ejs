@@ -1,0 +1,98 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="assets/js/metter.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="assets/css/launcher.css">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+          integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="assets/css/swal.css">
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/popper.js"></script>
+    <script src="assets/js/tippy.js"></script>
+    <script src="assets/js/swal.js"></script>
+
+    <script src="assets/js/scripts/uicore.js"></script>
+    <script src="assets/js/scripts/uibinder.js"></script>
+    <script src="../../assets/js/launcher.js"></script>
+
+    <style>
+        body {
+            transition: background-image 1s ease;
+            background: black;
+        }
+
+        #main {
+            display: none;
+            height: calc(100% - 22px);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
+            width: 100%;
+            position: absolute;
+            z-index: 10;
+        }
+
+        #main[overlay] {
+            filter: blur(3px) contrast(0.9) brightness(1.0);
+        }
+
+        #myVideo {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+        }
+
+    </style>
+</head>
+<body bkid="<%= bkid %>">
+<%- include('frame') %>
+
+<video autoplay muted loop id="myVideo">
+    <source src="" type="video/mp4" id="myVideoSrc">
+</video>
+
+<audio id="myAudio" src="" controls loop="true" hidden></audio>
+
+<div id="main">
+    <div id="audioControll">
+        <i class="fas fa-volume-up fa-2x" id="audioIcon"></i>
+    </div>
+    <%- include('welcome') %>
+    <%- include('login') %>
+
+    <%- include('landing') %>
+</div>
+<%- include('overlay') %>
+<div id="loadingContainer">
+    <div id="loadingContent">
+        <div id="loadSpinnerContainer">
+            <img id="loadCenterImage" src="assets/images/logo.png">
+        </div>
+    </div>
+    <span style="position: absolute; bottom: 10%; color: white; font-size: 45px;" id="loadingText">Chargement du launcher</span>
+</div>
+<script>
+    // Load language
+    for (let key of Object.keys(Lang.query('html'))) {
+        document.getElementById(key).innerHTML = Lang.query(`html.${key}`)
+    }
+
+
+    function loadingErr() {
+        if ($('#loadingContainer').is(':visible')) {
+            $('#loadingText').css('font-size', '30px')
+            $('#loadingText').css('background-color', 'red')
+            $('#loadingText').css('color', 'white')
+            $('#loadingText').text('il semblerais que cela prenne du temps, merci de redémarer le launcher')
+        }
+    }
+    setTimeout(loadingErr, 1000 * 10)
+
+</script>
+
+
+</body>
+</html>
