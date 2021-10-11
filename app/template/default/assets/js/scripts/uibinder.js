@@ -83,6 +83,8 @@ async function showMainUI(data) {
         }
 
 
+
+
         setTimeout(() => {
             $('#loadingContainer').fadeOut(500, () => {
                 $('#loadSpinnerImage').removeClass('rotating')
@@ -90,6 +92,8 @@ async function showMainUI(data) {
         }, 250)
 
         initNews()
+
+        ipcRenderer.send('open-done')
 
 
     }, 750)
@@ -375,19 +379,20 @@ function setSelectedAccount(uuid) {
 }
 
 function startUI() {
-    //if (rscShouldLoad) {
-    //    rscShouldLoad = false
-    if (!fatalStartupError) {
-        const data = DistroManager.getDistro().then((data) => {
-            showMainUI(data)
-        })
+    if (rscShouldLoad) {
+        rscShouldLoad = false
+        if (!fatalStartupError) {
+            const data = DistroManager.getDistro().then((data) => {
+                showMainUI(data)
+            })
 
+        } else {
+            showFatalStartupError()
+        }
     } else {
-        showFatalStartupError()
+        ipcRenderer.send('launch-check')
+        setTimeout(startUI, 100)
     }
-    //} else {
-    //    setTimeout(startUI, 100)
-    //}
 }
 
 // Synchronous Listener

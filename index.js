@@ -16,6 +16,10 @@ let toQuit = true
 //AVAILABLES THEMES ARE : default, modern
 let themeFile = path.join(launcherDir, 'theme.txt')
 let theme
+let tempData = null
+let rsc = false
+let launch = Date.now()
+
 try {
     if (fs.existsSync(themeFile)) {
         try {
@@ -108,7 +112,19 @@ ipcMain.on('autoUpdateAction', (event, arg, data) => {
 })
 // Redirect distribution index event from preloader to renderer.
 ipcMain.on('distributionIndexDone', (event, res) => {
+    console.log('get distribution index')
+    rsc = true
+    tempData = res
     event.sender.send('distributionIndexDone', res)
+})
+
+ipcMain.on('launch-check', (event) => {
+    if (rsc){
+        console.log('ask for distribution index on uibinder')
+        console.log(tempData)
+        event.sender.send('distributionIndexDone', tempData)
+    }
+
 })
 
 // Disable hardware acceleration.
@@ -399,4 +415,9 @@ ipcMain.on('switch-theme', (event, args) => {
 ipcMain.on('close-launcher', () => {
     win.close()
     app.quit()
+})
+
+ipcMain.on('open-done', () => {
+    let date = Date.now()
+    console.log(date-launch + 'ms')
 })

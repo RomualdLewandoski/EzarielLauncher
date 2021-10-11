@@ -83,6 +83,7 @@ async function showMainUI(data) {
         }
 
 
+
         setTimeout(() => {
             $('#loadingContainer').fadeOut(500, () => {
                 $('#loadSpinnerImage').removeClass('rotating')
@@ -90,6 +91,8 @@ async function showMainUI(data) {
         }, 250)
 
         initNews()
+
+        ipcRenderer.send('open-done')
 
 
     }, 750)
@@ -377,8 +380,8 @@ function setSelectedAccount(uuid) {
 // Synchronous Listener
 
 function startUI() {
-    //if (rscShouldLoad) {
-        //rscShouldLoad = false
+    if (rscShouldLoad) {
+        rscShouldLoad = false
         if (!fatalStartupError) {
             const data = DistroManager.getDistro().then((data) => {
                 showMainUI(data)
@@ -387,9 +390,10 @@ function startUI() {
         } else {
             showFatalStartupError()
         }
-    //} else {
-    //    setTimeout(startUI, 100)
-    //}
+    } else {
+        ipcRenderer.send('launch-check')
+        setTimeout(startUI, 100)
+    }
 }
 
 /*
@@ -416,7 +420,6 @@ document.addEventListener('readystatechange', async function () {
 // Actions that must be performed after the distribution index is downloaded.
 
 ipcRenderer.on('distributionIndexDone', async (event, res) => {
-
     if (res) {
         const data = await DistroManager.getDistro()
         syncModConfigurations(data)
