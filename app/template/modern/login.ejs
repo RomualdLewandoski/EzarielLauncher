@@ -1,0 +1,69 @@
+<div id="loginContainer" style="display: none;">
+    <div id="loginCancelContainer" style="display: none;">
+        <button id="loginCancelButton">
+            <div id="loginCancelIcon">X</div>
+            <span id="loginCancelText">Cancel</span>
+        </button>
+    </div>
+    <div id="loginContent">
+        <form id="loginForm">
+            <br>
+            <img id="loginImageSeal" src="assets/images/logo.png"/>
+            <span id="loginSubheader h1">CONNEXION A EZARIEL</span>
+            <span class="mt-1 text-center mb-2 small">Pour jouer sur Ezariel,<br> vous devez posséder un compte sur notre site</span>
+
+            <div class="loginFieldContainer">
+                <span class="loginErrorSpan" id="loginEmailError">* Valeur incorrecte</span>
+                <div class="input-group mt-4 mb-2">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text"><i class="far fa-user"></i></div>
+                    </div>
+                    <input id="loginUsername" class="loginField form-control" type="text" placeholder="PSEUDO"/>
+
+                </div>
+            </div>
+            <div class="loginFieldContainer">
+                <span class="loginErrorSpan" id="loginPasswordError">* Requis</span>
+                <div class="input-group mt-4 mb-2">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text"><i class="far fa-lock"></i></div>
+                    </div>
+                    <input id="loginPassword" class="loginField form-control" type="password" placeholder="MOT DE PASSE"/>
+                </div>
+            </div>
+            <div id="loginOptions">
+                <span class="loginSpanDim">
+                    <a href="http://ezariel.eu/user/password/reset">Mot de passe oublié ?</a>
+                </span>
+
+                <label id="checkmarkContainer">
+                    <input id="loginRememberOption" type="checkbox" checked>
+                    <span id="loginRememberText" class="loginSpanDim">Se souvenir de moi?</span>
+                    <span class="loginCheckmark"></span>
+                </label>
+            </div>
+            <button id="loginButton" disabled>
+                <div id="loginButtonContent">
+                    CONNEXION
+                    <svg id="loginSVG" viewBox="0 0 24.87 13.97">
+                        <defs>
+                            <style>.arrowLine{fill:none;stroke:#FFF;stroke-width:2px;transition: 0.25s ease;}</style>
+                        </defs>
+                        <polyline class="arrowLine" points="0.71 13.26 12.56 1.41 24.16 13.02"/>
+                    </svg>
+                    <div class="circle-loader">
+                        <div class="checkmark draw"></div>
+                    </div>
+                    <!--<div class="spinningCircle" id="loginSpinner"></div>-->
+                </div>
+            </button>
+            <div id="loginDisclaimer">
+                <span class="loginSpanDim" id="loginRegisterSpan">
+                    <a href="http://ezariel.eu/user/register">Créer un compte?</a>
+                </span>
+
+            </div>
+        </form>
+    </div>
+    <script src="assets/js/scripts/login.js"></script>
+</div>
