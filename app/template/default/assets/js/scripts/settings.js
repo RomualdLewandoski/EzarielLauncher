@@ -9,6 +9,39 @@ const settingsState = {
     invalid: new Set()
 }
 
+$('#deleteData').click(() => {
+    //on send la demande de suppression
+    /*if (confirm('Cette action va effacer toutes les données du launcher, voulez vous continuer ? ')) {
+        ipcRenderer.send('delete-action')
+    }*/
+    Swal.fire({
+        title: 'Cette action va effacer toutes les données du launcher, voulez vous continuer ?',
+        showDenyButton: true,
+        confirmButtonText: 'Supprimer tout',
+        denyButtonText: 'Annuler',
+    }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+            ipcRenderer.send('delete-action')
+        }
+    })
+})
+
+ipcRenderer.on('delete-ok', () => {
+    Swal.fire({
+        title: 'Données du launcher effacée',
+        text: 'Les données du launcher ont été effacée, vous allez devoir vous reconnecter',
+        icon: 'success',
+        confirmButtonText: 'Ok'
+    })
+    let session = ConfigManager.getSelectedAccount()
+    AuthManager.removeAccount(session.uuid).then(() => {
+        switchView(getCurrentView(), VIEWS.login)
+    })
+
+})
+
+
 $('#themePicker').change(() => {
     if ($('#themePicker').val() != '') {
         ipcRenderer.send('switch-theme', $('#themePicker').val())
