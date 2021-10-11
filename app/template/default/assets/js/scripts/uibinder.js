@@ -375,19 +375,19 @@ function setSelectedAccount(uuid) {
 }
 
 function startUI() {
-    if (rscShouldLoad) {
-        rscShouldLoad = false
-        if (!fatalStartupError) {
-            const data = DistroManager.getDistro().then((data) => {
-                showMainUI(data)
-            })
+    //if (rscShouldLoad) {
+    //    rscShouldLoad = false
+    if (!fatalStartupError) {
+        const data = DistroManager.getDistro().then((data) => {
+            showMainUI(data)
+        })
 
-        } else {
-            showFatalStartupError()
-        }
     } else {
-        setTimeout(startUI, 100)
+        showFatalStartupError()
     }
+    //} else {
+    //    setTimeout(startUI, 100)
+    //}
 }
 
 // Synchronous Listener
@@ -411,7 +411,6 @@ function startUI() {
 */
 // Actions that must be performed after the distribution index is downloaded.
 ipcRenderer.on('distributionIndexDone', async (event, res) => {
-
     if (res) {
         const data = await DistroManager.getDistro()
         syncModConfigurations(data)

@@ -5,7 +5,7 @@ $(document).on('readystatechange', async () => {
         //bind frame buttons here
         $('.fCb').click(() => {
             const window = remote.getCurrentWindow()
-            window.close()
+            ipcRenderer.sendSync('close-launcher')
         })
 
         $('.fRb').click(() => {

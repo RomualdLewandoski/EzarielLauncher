@@ -299,22 +299,16 @@ app.on('ready', function () {
             createWindow(false)
         } else {
             if (semver.lt(app.getVersion(), last)) {
-                dialog.showErrorBox('Mise a jour', 'Une nouvelle version est disponnible, le launcher va se mettre à jour')
-
-                //@TODO différent pour mac et linux ici !
                 if (process.platform === 'darwin') {
-                    //code mac
-                    //on va ouvrir une fenetre de confirmation
                     dialog.showErrorBox('Mise à jour', 'Une mise a jour est disponnible, merci de la telecharger ')
                     shell.openExternal('https://launcher.ezariel.eu/download/mac')
-
+                    app.quit()
                 } else if (process.platform === 'linux') {
                     dialog.showErrorBox('Mise à jour', 'Une mise a jour est disponnible, merci de la telecharger ')
                     shell.openExternal('https://launcher.ezariel.eu/download/linux')
-                    //code linux
-                    //on va ouvrir une fenetre de confirmation
-
+                    app.quit()
                 } else {
+                    dialog.showErrorBox('Mise a jour', 'Une nouvelle version est disponnible, le launcher va se mettre à jour')
                     createMenu()
                     createWindow(true)
                     //here we need to create our download
@@ -400,4 +394,9 @@ ipcMain.on('switch-theme', (event, args) => {
 
     }
 
+})
+
+ipcMain.on('close-launcher', () => {
+    win.close()
+    app.quit()
 })

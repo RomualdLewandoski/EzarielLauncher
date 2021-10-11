@@ -377,8 +377,8 @@ function setSelectedAccount(uuid) {
 // Synchronous Listener
 
 function startUI() {
-    if (rscShouldLoad) {
-        rscShouldLoad = false
+    //if (rscShouldLoad) {
+        //rscShouldLoad = false
         if (!fatalStartupError) {
             const data = DistroManager.getDistro().then((data) => {
                 showMainUI(data)
@@ -387,9 +387,9 @@ function startUI() {
         } else {
             showFatalStartupError()
         }
-    } else {
-        setTimeout(startUI, 100)
-    }
+    //} else {
+    //    setTimeout(startUI, 100)
+    //}
 }
 
 /*
