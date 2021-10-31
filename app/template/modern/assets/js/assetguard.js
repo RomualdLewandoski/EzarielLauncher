@@ -1574,6 +1574,7 @@ class AssetGuard extends EventEmitter {
 
     _enqueueOpenJDK(dataDir){
         return new Promise((resolve, reject) => {
+            //JavaGuard._latestOpenJDK('11').then(verData => {
             JavaGuard._latestOpenJDK('8').then(verData => {
                 if(verData != null){
 

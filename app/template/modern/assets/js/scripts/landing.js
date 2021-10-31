@@ -101,6 +101,8 @@ function setLaunchEnabled(val) {
     document.getElementById('playBtn').disabled = !val
 }
 
+let javaCurrentVersion
+
 // Bind launch button
 document.getElementById('playBtn').addEventListener('click', function (e) {
     if (isLaunch == false) {
@@ -128,11 +130,22 @@ document.getElementById('playBtn').addEventListener('click', function (e) {
             const jg = new JavaGuard(mcVersion)
             jg._validateJavaBinary(jExe).then((v) => {
                 loggerLanding.log('Java version meta', v)
+
                 if (v.valid) {
-                    dlAsync()
+                    javaCurrentVersion = v.version.major
+                    /*if (v.vendor == "Eclipse Adoptium"){
+                        dlAsync()
+                    }else{*/
+                       /* if (v.version.major < 11) {
+                            asyncSystemScan(mcVersion)
+                        } else {*/
+                            dlAsync()
+                        //}
+                   // }
                 } else {
                     asyncSystemScan(mcVersion)
                 }
+
             })
         }
 
@@ -302,6 +315,45 @@ let scanAt
 
 let extractListener
 
+function noJavaFound(){
+    let distro = DistroManager.getDistribution()
+    setOverlayContent(
+        'Aucune installation<br>Java compatible',
+        'Pour jouer avec le launcher Ezariel vous devez avoir au minimum JAVA 8. Voulez vous télécharger la version 8 ? Vous acceptez  <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">les conditions d\'utilisation d\'oracle</a>.',
+        'Installer Java',
+        'Non merci'
+
+    )
+    setOverlayHandler(() => {
+        //on va dl java ICI !
+        ipcRenderer.send('open-Java', distro.java.oracle)
+
+        toggleOverlay(false)
+    })
+    setDismissHandler(() => {
+        $('#overlayContent').fadeOut(250, () => {
+            //$('#overlayDismiss').toggle(false)
+            setOverlayContent(
+                'Java est requis<br>pour jouer',
+                'Une installation valide de java 8 est requise.<br>',
+                'Fermer',
+                'Télécharger java'
+            )
+            setOverlayHandler(() => {
+                toggleLaunchArea(false)
+                toggleOverlay(false)
+            })
+            setDismissHandler(() => {
+                //on va dl java ici
+                ipcRenderer.send('open-Java', distro.java.oracle)
+            })
+            $('#overlayContent').fadeIn(250)
+        })
+    })
+    toggleOverlay(true, true)
+}
+
+
 /**
  * Asynchronously scan the system for valid Java installations.
  *
@@ -341,50 +393,10 @@ function asyncSystemScan(mcVersion, launchAfter = true) {
     sysAEx.on('message', (m) => {
 
         if (m.context === 'validateJava') {
-            if (m.result == null) {
+            if (m.result == null /*|| javaCurrentVersion < 11*/) {
                 // If the result is null, no valid Java installation was found.
                 // Show this information to the user.
-                setOverlayContent(
-                    'No Compatible<br>Java Installation Found',
-                    'In order to join WesterosCraft, you need a 64-bit installation of Java 8. Would you like us to install a copy? By installing, you accept <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">Oracle\'s license agreement</a>.',
-                    'Install Java',
-                    'Install Manually'
-                )
-                setOverlayHandler(() => {
-                    setLaunchDetails('Preparing Java Download..')
-                    sysAEx.send({
-                        task: 'changeContext',
-                        class: 'AssetGuard',
-                        args: [ConfigManager.getCommonDirectory(), ConfigManager.getJavaExecutable()]
-                    })
-                    sysAEx.send({
-                        task: 'execute',
-                        function: '_enqueueOpenJDK',
-                        argsArr: [ConfigManager.getDataDirectory()]
-                    })
-                    toggleOverlay(false)
-                })
-                setDismissHandler(() => {
-                    $('#overlayContent').fadeOut(250, () => {
-                        //$('#overlayDismiss').toggle(false)
-                        setOverlayContent(
-                            'Java is Required<br>to Launch',
-                            'A valid x64 installation of Java 8 is required to launch.<br><br>Please refer to our <a href="https://github.com/dscalzi/HeliosLauncher/wiki/Java-Management#manually-installing-a-valid-version-of-java">Java Management Guide</a> for instructions on how to manually install Java.',
-                            'I Understand',
-                            'Go Back'
-                        )
-                        setOverlayHandler(() => {
-                            toggleLaunchArea(false)
-                            toggleOverlay(false)
-                        })
-                        setDismissHandler(() => {
-                            toggleOverlay(false, true)
-                            asyncSystemScan()
-                        })
-                        $('#overlayContent').fadeIn(250)
-                    })
-                })
-                toggleOverlay(true, true)
+                noJavaFound()
 
             } else {
                 // Java installation found, use this to launch the game.
@@ -968,7 +980,7 @@ let newsAlertShown = false
  */
 function showNewsAlert() {
     newsAlertShown = true
-    $(newsButtonAlert).fadeIn(250)
+    //$(newsButtonAlert).fadeIn(250)
 }
 
 /**
@@ -1119,7 +1131,12 @@ function displayArticle(articleObject, index) {
     newsArticleAuthor.innerHTML = 'Par ' + articleObject.author
     newsArticleDate.innerHTML = articleObject.date
 
-    newsArticleContentScrollable.innerHTML = '<div id="newsArticleContentWrapper"><div class="newsArticleSpacerTop"></div>' + articleObject.content + '<div class="newsArticleSpacerBot"></div></div>'
+    articleObject.content = articleObject.content.replace(/<a href="\//g, '<a href="https://ezariel.eu/')
+
+    newsArticleContentScrollable.innerHTML = '<div id="newsArticleContentWrapper"><div class="newsArticleSpacerTop"></div>' +
+        articleObject.content
+
+        + '<div class="newsArticleSpacerBot"></div></div>'
     Array.from(newsArticleContentScrollable.getElementsByClassName('bbCodeSpoilerButton')).forEach(v => {
         v.onclick = () => {
             const text = v.parentElement.getElementsByClassName('bbCodeSpoilerText')[0]

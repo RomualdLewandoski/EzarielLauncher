@@ -421,3 +421,7 @@ ipcMain.on('open-done', () => {
     let date = Date.now()
     console.log(date-launch + 'ms')
 })
+
+ipcMain.on('open-Java', (event, args)=>{
+    shell.openExternal(args)
+})
