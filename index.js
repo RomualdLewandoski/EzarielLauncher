@@ -472,13 +472,13 @@ ipcMain.on('check-java', function(event){
     const outputDir = mcGame
     const {exec} = require('child_process')
     let file
-    let zip
+    let zipF
     if (process.platform == "darwin"){
         file = fs.createWriteStream("/tmp/"+zipFile)
-        zip = "/tmp/"+zipFile
+        zipF = "/tmp/"+zipFile
     }else{
         file = fs.createWriteStream(zipFile)
-        zip = zipFile
+        zipF = zipFile
     }
     if (fs.existsSync(jre)) {
         console.log('JRE FOUND')
@@ -495,7 +495,7 @@ ipcMain.on('check-java', function(event){
                 console.log('finished dowloading')
 
                 if (process.platform == 'darwin') {
-                    let zip = new admZip(zip)
+                    let zip = new admZip(zipF)
                     console.log('start unzip')
                     zip.extractEntryTo(extractEntryTo, outputDir, true, true)
                     console.log('finished unzip')
