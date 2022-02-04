@@ -492,31 +492,18 @@ ipcMain.on('check-java', function(event){
                 console.log('finished dowloading')
 
                 if (process.platform == 'darwin') {
-                    exec('chmod 777 ' + zipFile, function(err, stdout, stderr){
+                    let zip = new admZip(zipFile)
+                    console.log('start unzip')
+                    zip.extractEntryTo(extractEntryTo, outputDir, true, true)
+                    console.log('finished unzip')
+                    let file = path.join(process.env.HOME + '/Library/Application\\ Support', 'ezariel')
+
+                    exec('chmod -R +x ' + file, (err, stdout, stderr) => {
                         if (err) {
                             //some err occurred
-                            alert(err)
+                            console.error(err)
                         } else {
-                            exec('chmod +x ' + zipFile, function(err, stdout, stderr){
-                                if (err){
-                                    alert(err)
-                                }else{
-                                    let zip = new admZip(zipFile)
-                                    console.log('start unzip')
-                                    zip.extractEntryTo(extractEntryTo, outputDir, true, true)
-                                    console.log('finished unzip')
-                                    let file = path.join(process.env.HOME + '/Library/Application\\ Support', 'ezariel')
-
-                                    exec('chmod -R +x ' + file, (err, stdout, stderr) => {
-                                        if (err) {
-                                            //some err occurred
-                                            console.error(err)
-                                        } else {
-                                            event.reply('java-dl-ok')
-                                        }
-                                    })
-                                }
-                            })
+                            event.reply('java-dl-ok')
                         }
                     })
                 } else {
