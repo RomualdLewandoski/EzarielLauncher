@@ -11,6 +11,12 @@ const semver = require('semver')
 const {pathToFileURL} = require('url')
 const launcherDir = process.env.CONFIG_DIRECT_PATH || app.getPath('userData')
 const EAU = require('electron-asar-hot-updater')
+const crypto = require('crypto')
+const https = require('https')
+const request = require('request')
+const fetch = require('node-fetch')
+
+
 let toQuit = true
 
 //AVAILABLES THEMES ARE : default, modern
@@ -19,7 +25,8 @@ let theme
 let tempData = null
 let rsc = false
 let launch = Date.now()
-
+const sysRoot = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
+const dataPath = path.join(sysRoot, '.ezariel')
 try {
     if (fs.existsSync(themeFile)) {
         try {
@@ -119,7 +126,7 @@ ipcMain.on('distributionIndexDone', (event, res) => {
 })
 
 ipcMain.on('launch-check', (event) => {
-    if (rsc){
+    if (rsc) {
         console.log('ask for distribution index on uibinder')
         console.log(tempData)
         event.sender.send('distributionIndexDone', tempData)
@@ -381,8 +388,7 @@ ipcMain.on('openConsole', () => {
 })
 
 ipcMain.on('delete-action', (event) => {
-    const sysRoot = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
-    const dataPath = path.join(sysRoot, '.ezariel')
+
 
     fs.rmdir(dataPath, {recursive: true}, (err) => {
         if (err) {
@@ -419,9 +425,136 @@ ipcMain.on('close-launcher', () => {
 
 ipcMain.on('open-done', () => {
     let date = Date.now()
-    console.log(date-launch + 'ms')
+    console.log(date - launch + 'ms')
 })
 
-ipcMain.on('open-Java', (event, args)=>{
+ipcMain.on('open-Java', (event, args) => {
     shell.openExternal(args)
 })
+
+ipcMain.on('check-java', (event) => {
+
+    //step 1 => Check for java path
+    //step 2 =>
+    // IF java file found assume ok so send ok
+    // ELSE download and extract zip for java based on OS
+    // at the end of the extract send OK
+
+    console.log('check java')
+
+    //const source = 'https://launcher.ezariel.eu/uploads/RessourcePack/EzarielPack.zip'
+    //const zipFile = 'EzarielPack.zip'
+
+
+    let mcGame = dataPath
+    let jre = path.join(mcGame, 'jre')
+
+
+    const admZip = require('adm-zip')
+    const request = require('superagent')
+    const fs = require('fs')
+
+    const repoName = 'jre'
+    const href = 'https://launcher.ezariel.eu/uploads/JRE'
+    let zipFile
+    if (process.platform === 'darwin') {
+        zipFile = 'mac.zip'
+    } else if (process.platform === 'linux') {
+        zipFile = 'linux.zip'
+    } else {
+        zipFile = 'master.zip'
+    }
+
+    const source = `${href}/${zipFile}`
+    const extractEntryTo = `${repoName}/`
+    const outputDir = mcGame
+
+    if (fs.existsSync(jre)) {
+        console.log('JRE FOUND')
+        event.reply('java-ok')
+    } else {
+        console.log('JRE NOT FOUND')
+        request
+            .get(source)
+            .on('error', function (error) {
+                console.log(error)
+            })
+            .pipe(fs.createWriteStream(zipFile))
+            .on('finish', function () {
+                console.log('finished dowloading')
+                let zip = new admZip(zipFile)
+                console.log('start unzip')
+                zip.extractEntryTo(extractEntryTo, outputDir, true, true)
+                console.log('finished unzip')
+                event.reply('java-dl-ok')
+            })
+    }
+})
+
+ipcMain.on('launch-game', (event, args) => {
+
+    console.log('recieve', args)
+    //on récupère le json une première fois
+
+
+    let launcher = path.join(dataPath, 'launcher.jar')
+    fetch('https://launcher.ezariel.eu/updater')
+        .then(res => res.json())
+        .then((json) => {
+            if (fs.existsSync(launcher)) {
+                //check sha
+                let file = fs.readFileSync(path.join(dataPath, 'launcher.jar'))
+                let sha1sum = crypto.createHash('sha1').update(file).digest('hex')
+                shaCalculate(sha1sum, json, args, event)
+            } else {
+                downloadMicroLauncher(json, args, event)
+            }
+        })
+
+
+})
+
+function downloadMicroLauncher(json, args, event) {
+    let file = fs.createWriteStream(path.join(dataPath, 'launcher.jar'))
+    const request = require('superagent')
+    event.reply('microlauncher-download')
+    request
+        .get(json.launcher.downloadURL)
+        .on('error', function (error) {
+            console.log(error)
+        })
+        .pipe(file)
+        .on('finish', function () {
+            console.log('Download Finished')
+            executeMicroLauncher(args)
+        })
+}
+
+function executeMicroLauncher(args) {
+    let file = path.join(dataPath, 'launcher.jar')
+    let child = require('child_process').spawn('java',
+        ['-jar',
+            file,
+            '--username=' + args[0],
+            '--uuid=' + args[1],
+            '--access_token=' + args[2],
+            '--min-ram='+args[3],
+            '--max-ram='+args[4]
+        ], {
+            detached: true
+        })
+
+    child.stdout.on('data', () => {
+        win.close()
+        app.quit()
+    })
+}
+
+function shaCalculate(sha1sum, json, args, event) {
+    console.log(sha1sum)
+    let onlineSha = json.launcher.sha1
+    if (sha1sum == onlineSha) {
+        executeMicroLauncher(args)
+    }
+    downloadMicroLauncher(json, args, event)
+}

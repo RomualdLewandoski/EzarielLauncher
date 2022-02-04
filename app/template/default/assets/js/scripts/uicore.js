@@ -19,6 +19,7 @@ let launcherConfigs
 const times = []
 let fps
 let meter
+var canLaunch = false
 // Log deprecation and process warnings.
 process.traceProcessWarnings = true
 process.traceDeprecation = true
@@ -48,7 +49,40 @@ function meterShow() {
 function meterHide() {
     meter.hide()
 }
+function launchGame(args){
+    ipcRenderer.send('launch-game', args)
+}
 
+function checkJava(){
+    ipcRenderer.send('check-java')
+}
+
+ipcRenderer.on('java-ok', () => {
+    canLaunch = true
+})
+ipcRenderer.on('java-dl-ok', () => {
+    canLaunch = true
+    javaDone()
+})
+
+ipcRenderer.on('microlauncher-download', () => {
+    setLaunchDetails("Téléchargement du micrologiciel")
+})
+
+function javaDone() {
+    Swal.fire({
+        icon: 'success',
+        title: 'Java téléchargé',
+        showConfirmButton: false,
+        target: '#custom-target',
+        customClass: {
+            container: 'position-absolute'
+        },
+        toast: true,
+        position: 'bottom-right',
+        timer: 2500
+    })
+}
 function showUpdateUI(info) {
     //TODO Make this message a bit more informative `${info.version}`
     document.getElementById('image_seal_container').setAttribute('update', true)

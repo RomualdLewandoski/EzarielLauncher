@@ -105,51 +105,35 @@ let javaCurrentVersion
 
 // Bind launch button
 document.getElementById('playBtn').addEventListener('click', function (e) {
-    if (isLaunch == false) {
-        isLaunch = true
-        loggerLanding.log('Launching game..')
-        if (landingView != 'landing') {
-            //on save et on switch vers la page principale
-            saveSettings()
-            $('#settingsContainer').hide()
-            $('#landindContent').show()
-            $('#settingsBtn').removeClass('active')
-            $('#landingBtn').addClass('active')
-            landingView = 'landing'
-        }
-        const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
-        const jExe = ConfigManager.getJavaExecutable()
-        if (jExe == null) {
-            asyncSystemScan(mcVersion)
-        } else {
-
-            setLaunchDetails(Lang.queryJS('landing.launch.pleaseWait'))
+    if (canLaunch) {
+        if (isLaunch == false) {
+            isLaunch = true
+            loggerLanding.log('Launching game..')
+            if (landingView != 'landing') {
+                //on save et on switch vers la page principale
+                saveSettings()
+                $('#settingsContainer').hide()
+                $('#landindContent').show()
+                $('#settingsBtn').removeClass('active')
+                $('#landingBtn').addClass('active')
+                landingView = 'landing'
+            }
+            let account = ConfigManager.getSelectedAccount()
+            let access_token = ConfigManager.getClientToken()
+            let minRam = ConfigManager.getMinRAM()
+            let maxRam = ConfigManager.getMaxRAM()
             toggleLaunchArea(true)
-            setLaunchPercentage(0, 100)
+            setLaunchDetails("Préparation au lancement")
+            launchGame([account.username, account.uuid, access_token, minRam, maxRam])
 
-            const jg = new JavaGuard(mcVersion)
-            jg._validateJavaBinary(jExe).then((v) => {
-                loggerLanding.log('Java version meta', v)
-
-                if (v.valid) {
-                    javaCurrentVersion = v.version.major
-                    /*if (v.vendor == "Eclipse Adoptium"){
-                        dlAsync()
-                    }else{*/
-                       /* if (v.version.major < 11) {
-                            asyncSystemScan(mcVersion)
-                        } else {*/
-                            dlAsync()
-                        //}
-                   // }
-                } else {
-                    asyncSystemScan(mcVersion)
-                }
-
-            })
         }
-
+    } else {
+        Swal.fire({
+            icon: 'error',
+            text: 'Impossible de lancer le jeu pour le moment. Java est en cours de téléchargement, merci de re-essayer dans un moment'
+        })
     }
+
 })
 
 // Bind settings button
@@ -315,14 +299,13 @@ let scanAt
 
 let extractListener
 
-function noJavaFound(){
+function noJavaFound() {
     let distro = DistroManager.getDistribution()
     setOverlayContent(
         'Aucune installation<br>Java compatible',
         'Pour jouer avec le launcher Ezariel vous devez avoir au minimum JAVA 8. Voulez vous télécharger la version 8 ? Vous acceptez  <a href="http://www.oracle.com/technetwork/java/javase/terms/license/index.html">les conditions d\'utilisation d\'oracle</a>.',
         'Installer Java',
         'Non merci'
-
     )
     setOverlayHandler(() => {
         //on va dl java ICI !

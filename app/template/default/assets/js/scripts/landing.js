@@ -100,7 +100,7 @@ function setLaunchEnabled(val) {
 
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', function (e) {
-    loggerLanding.log('Launching game..')
+    /*loggerLanding.log('Launching game..')
     const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
     const jExe = ConfigManager.getJavaExecutable()
     if (jExe == null) {
@@ -120,6 +120,16 @@ document.getElementById('launch_button').addEventListener('click', function (e) 
                 asyncSystemScan(mcVersion)
             }
         })
+    }*/
+    if (canLaunch) {
+        loggerLanding.log('Launching game..')
+        let account = ConfigManager.getSelectedAccount()
+        let access_token = ConfigManager.getClientToken()
+        let minRam = ConfigManager.getMinRAM()
+        let maxRam = ConfigManager.getMaxRAM()
+        toggleLaunchArea(true)
+        setLaunchDetails("Préparation au lancement")
+        launchGame([account.username, account.uuid, access_token, minRam, maxRam])
     }
 })
 

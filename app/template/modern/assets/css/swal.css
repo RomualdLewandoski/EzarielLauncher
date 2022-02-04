@@ -1314,3 +1314,15 @@ body.swal2-toast-shown .swal2-container.swal2-bottom-end, body.swal2-toast-shown
     bottom: 0;
     left: auto;
 }
+
+#custom-target {
+    position: absolute;
+    width: 400px;
+    height: 150px;
+    right: 110px;
+    bottom: 0;
+}
+
+.position-absolute {
+    position: absolute;
+}

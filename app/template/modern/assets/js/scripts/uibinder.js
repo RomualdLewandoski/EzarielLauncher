@@ -10,6 +10,7 @@ const ConfigManager = require('./assets/js/configmanager')
 const DistroManager = require('./assets/js/distromanager')
 const Lang = require('./assets/js/langloader')
 
+
 let rscShouldLoad = false
 let fatalStartupError = false
 
@@ -65,7 +66,7 @@ async function showMainUI(data) {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
 
         $('#main').show()
-
+        checkJava()
         const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
 
         // If this is enabled in a development environment we'll get ratelimited.

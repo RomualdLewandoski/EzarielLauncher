@@ -79,7 +79,6 @@ $(document).on('readystatechange', async () => {
                 document.getElementById('launch_progress').style.width = '90%'
                 document.getElementById('launch_details_right').style.width = '90%'
                 document.getElementById('launch_progress_label').style.width = 53.21
-
                 startUI()
             })
 

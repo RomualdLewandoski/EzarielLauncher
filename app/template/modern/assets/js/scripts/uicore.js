@@ -19,6 +19,7 @@ let launcherConfigs
 const times = []
 let fps
 let meter
+var canLaunch = false
 // Log deprecation and process warnings.
 process.traceProcessWarnings = true
 process.traceDeprecation = true
@@ -48,6 +49,41 @@ function meterHide() {
     meter.hide()
 }
 
+function launchGame(args){
+    ipcRenderer.send('launch-game', args)
+}
+
+function checkJava(){
+    ipcRenderer.send('check-java')
+}
+
+ipcRenderer.on('java-ok', () => {
+    canLaunch = true
+})
+ipcRenderer.on('java-dl-ok', () => {
+    canLaunch = true
+    javaDone()
+})
+
+ipcRenderer.on('microlauncher-download', () => {
+    setLaunchDetails("Téléchargement du micrologiciel")
+})
+
+function javaDone() {
+    Swal.fire({
+        icon: 'success',
+        title: 'Java téléchargé',
+        showConfirmButton: false,
+        target: '#custom-target',
+        customClass: {
+            container: 'position-absolute'
+        },
+        toast: true,
+        position: 'bottom-right',
+        timer: 2500
+    })
+}
+
 function showUpdateUI(info) {
     //TODO Make this message a bit more informative `${info.version}`
     document.getElementById('image_seal_container').setAttribute('update', true)
@@ -70,8 +106,8 @@ function showUpdateUI(info) {
             })
         })*/
 
-        // Bind restore down button.
-        /*Array.from(document.getElementsByClassName('fRb')).map((val) => {
+// Bind restore down button.
+/*Array.from(document.getElementsByClassName('fRb')).map((val) => {
             val.addEventListener('click', e => {
                 const window = remote.getCurrentWindow()
                 if (window.isMaximized()) {
@@ -83,8 +119,8 @@ function showUpdateUI(info) {
             })
         })*/
 
-        // Bind minimize button.
-        /*Array.from(document.getElementsByClassName('fMb')).map((val) => {
+// Bind minimize button.
+/*Array.from(document.getElementsByClassName('fMb')).map((val) => {
             val.addEventListener('click', e => {
                 const window = remote.getCurrentWindow()
                 window.minimize()
@@ -92,11 +128,11 @@ function showUpdateUI(info) {
             })
         })*/
 
-        // Remove focus from social media buttons once they're clicked.
+// Remove focus from social media buttons once they're clicked.
 
 
-        //ici
-        /*let fallbackJson
+//ici
+/*let fallbackJson
         await fetch('https://launcher.ezariel.eu/launcher')
             .then(res => res.json())
             .then(json => fallbackJson = json)
@@ -132,7 +168,7 @@ function showUpdateUI(info) {
          * FPS DEBUG
          */
 
-       /* meter = new FPSMeter()
+/* meter = new FPSMeter()
         meter.hide()
 
         refreshLoop(meter)*/
@@ -146,17 +182,17 @@ function showUpdateUI(info) {
         document.getElementById('launch_details_right').style.width = "90%"
         document.getElementById('launch_progress_label').style.width = 53.21*/
 
-  /*  }
+/*  }
 
 }, false)*/
 
-function toogleAudio(){
-    if(localStorage.getItem('audio') == 'on'){
+function toogleAudio() {
+    if (localStorage.getItem('audio') == 'on') {
         $('#audioIcon').removeClass('fa-volume-up')
         $('#audioIcon').addClass('fa-volume-mute')
         document.getElementById('myAudio').pause()
         localStorage.setItem('audio', 'off')
-    }else{
+    } else {
         $('#audioIcon').removeClass('fa-volume-mute')
         $('#audioIcon').addClass('fa-volume-up')
         document.getElementById('myAudio').play()

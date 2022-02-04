@@ -65,6 +65,7 @@ async function showMainUI(data) {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
 
         $('#main').show()
+        checkJava()
 
         const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
 
