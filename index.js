@@ -486,7 +486,24 @@ ipcMain.on('check-java', (event) => {
                 console.log('start unzip')
                 zip.extractEntryTo(extractEntryTo, outputDir, true, true)
                 console.log('finished unzip')
-                event.reply('java-dl-ok')
+
+                if(process.platform == "darwin"){
+                    let file = path.join(dataPath, 'jre', 'bin', 'java')
+                    const { exec } = require('child_process')
+                    exec('chmod +x '+file , (err, stdout, stderr) => {
+                        if (err) {
+                            //some err occurred
+                            console.error(err)
+                        } else {
+                            event.reply('java-dl-ok')
+                        }
+                    })
+                }else{
+                    event.reply('java-dl-ok')
+                }
+
+
+
             })
     }
 })
