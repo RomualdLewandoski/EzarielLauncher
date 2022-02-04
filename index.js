@@ -434,7 +434,7 @@ ipcMain.on('open-Java', (event, args) => {
     shell.openExternal(args)
 })
 
-ipcMain.on('check-java', (event) => {
+ipcMain.on('check-java', function(event){
 
     //step 1 => Check for java path
     //step 2 =>
@@ -486,12 +486,12 @@ ipcMain.on('check-java', (event) => {
                 console.log('finished dowloading')
 
                 if (process.platform == 'darwin') {
-                    exec('chmod 777 ' + zipFile, (err, stdout, stderr) => {
+                    exec('chmod 777 ' + zipFile, function(err, stdout, stderr){
                         if (err) {
                             //some err occurred
                             alert(err)
                         } else {
-                            exec('chmod +x ' + zipFile, (err, stdout, stderr) => {
+                            exec('chmod +x ' + zipFile, function(err, stdout, stderr){
                                 if (err){
                                     alert(err)
                                 }else{
