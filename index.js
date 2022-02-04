@@ -471,6 +471,11 @@ ipcMain.on('check-java', function(event){
     const extractEntryTo = `${repoName}/`
     const outputDir = mcGame
     const {exec} = require('child_process')
+    if (process.platform == "darwin"){
+        let file = fs.createWriteStream("/tmp/"+zipFile)
+    }else{
+        file = fs.createWriteStream(zipFile)
+    }
     if (fs.existsSync(jre)) {
         console.log('JRE FOUND')
         event.reply('java-ok')
@@ -481,7 +486,7 @@ ipcMain.on('check-java', function(event){
             .on('error', function (error) {
                 console.log(error)
             })
-            .pipe(fs.createWriteStream(zipFile))
+            .pipe(file)
             .on('finish', function () {
                 console.log('finished dowloading')
 
