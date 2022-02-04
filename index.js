@@ -26,7 +26,7 @@ let tempData = null
 let rsc = false
 let launch = Date.now()
 const sysRoot = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
-const dataPath = path.join(sysRoot, '.ezariel')
+const dataPath = path.join(sysRoot, process.platform == 'darwin' ? 'ezariel' : '.ezariel')
 try {
     if (fs.existsSync(themeFile)) {
         try {
