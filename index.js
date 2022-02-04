@@ -488,7 +488,7 @@ ipcMain.on('check-java', (event) => {
                 console.log('finished unzip')
 
                 if(process.platform == "darwin"){
-                    let file = path.join(dataPath, 'jre', 'bin', 'java')
+                    let file = path.join(process.env.HOME + '/Library/Application\\ Support', 'jre', 'bin', 'java')
                     const { exec } = require('child_process')
                     exec('chmod +x '+file , (err, stdout, stderr) => {
                         if (err) {
