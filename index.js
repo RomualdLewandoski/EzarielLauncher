@@ -15,6 +15,8 @@ const crypto = require('crypto')
 const https = require('https')
 const request = require('request')
 const fetch = require('node-fetch')
+const {exec} = require('child_process')
+const admZip = require('adm-zip')
 
 
 let toQuit = true
@@ -468,7 +470,7 @@ ipcMain.on('check-java', (event) => {
     const source = `${href}/${zipFile}`
     const extractEntryTo = `${repoName}/`
     const outputDir = mcGame
-
+    const {exec} = require('child_process')
     if (fs.existsSync(jre)) {
         console.log('JRE FOUND')
         event.reply('java-ok')
@@ -482,28 +484,37 @@ ipcMain.on('check-java', (event) => {
             .pipe(fs.createWriteStream(zipFile))
             .on('finish', function () {
                 console.log('finished dowloading')
-                let zip = new admZip(zipFile)
-                console.log('start unzip')
-                zip.extractEntryTo(extractEntryTo, outputDir, true, true)
-                console.log('finished unzip')
 
-                if(process.platform == "darwin"){
-                    let file = path.join(process.env.HOME + '/Library/Application\\ Support', 'ezariel')
-                    const { exec } = require('child_process')
-                    exec('chmod -R +x '+file , (err, stdout, stderr) => {
+                if (process.platform == 'darwin') {
+                    exec('chmod -R 777 ' + zipFile, (err, stdout, stderr) => {
                         if (err) {
                             //some err occurred
                             console.error(err)
                         } else {
-                            event.reply('java-dl-ok')
+                            let zip = new admZip(zipFile)
+                            console.log('start unzip')
+                            zip.extractEntryTo(extractEntryTo, outputDir, true, true)
+                            console.log('finished unzip')
+                            let file = path.join(process.env.HOME + '/Library/Application\\ Support', 'ezariel')
+
+                            exec('chmod -R +x ' + file, (err, stdout, stderr) => {
+                                if (err) {
+                                    //some err occurred
+                                    console.error(err)
+                                } else {
+                                    event.reply('java-dl-ok')
+                                }
+                            })
+
                         }
                     })
-                }else{
+                } else {
+                    let zip = new admZip(zipFile)
+                    console.log('start unzip')
+                    zip.extractEntryTo(extractEntryTo, outputDir, true, true)
+                    console.log('finished unzip')
                     event.reply('java-dl-ok')
                 }
-
-
-
             })
     }
 })
@@ -549,15 +560,15 @@ function downloadMicroLauncher(json, args, event) {
 
 function executeMicroLauncher(args) {
     let file = path.join(dataPath, 'launcher.jar')
-    let java = path.join(dataPath, 'jre', 'bin', process.platform == 'darwin' ? 'java' : process.platform == 'linux' ? 'java' : 'java.exe' )
+    let java = path.join(dataPath, 'jre', 'bin', process.platform == 'darwin' ? 'java' : process.platform == 'linux' ? 'java' : 'java.exe')
     let child = require('child_process').spawn(java,
         ['-jar',
             file,
             '--username=' + args[0],
             '--uuid=' + args[1],
             '--access_token=' + args[2],
-            '--min-ram='+args[3],
-            '--max-ram='+args[4]
+            '--min-ram=' + args[3],
+            '--max-ram=' + args[4]
         ], {
             detached: true
         })
