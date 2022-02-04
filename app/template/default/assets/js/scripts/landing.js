@@ -130,6 +130,11 @@ document.getElementById('launch_button').addEventListener('click', function (e) 
         toggleLaunchArea(true)
         setLaunchDetails("Préparation au lancement")
         launchGame([account.username, account.uuid, access_token, minRam, maxRam])
+    }else {
+        Swal.fire({
+            icon: 'error',
+            text: 'Impossible de lancer le jeu pour le moment. Java est en cours de téléchargement, merci de re-essayer dans un moment'
+        })
     }
 })
 
