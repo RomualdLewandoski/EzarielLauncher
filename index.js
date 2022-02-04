@@ -549,7 +549,8 @@ function downloadMicroLauncher(json, args, event) {
 
 function executeMicroLauncher(args) {
     let file = path.join(dataPath, 'launcher.jar')
-    let child = require('child_process').spawn('java',
+    let java = path.join(dataPath, 'jre', 'bin', process.platform == 'darwin' ? 'java' : process.platform == 'linux' ? 'java' : 'java.exe' )
+    let child = require('child_process').spawn(java,
         ['-jar',
             file,
             '--username=' + args[0],
