@@ -471,8 +471,9 @@ ipcMain.on('check-java', function(event){
     const extractEntryTo = `${repoName}/`
     const outputDir = mcGame
     const {exec} = require('child_process')
+    let file
     if (process.platform == "darwin"){
-        let file = fs.createWriteStream("/tmp/"+zipFile)
+        file = fs.createWriteStream("/tmp/"+zipFile)
     }else{
         file = fs.createWriteStream(zipFile)
     }
